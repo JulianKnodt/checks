@@ -1,0 +1,66 @@
+digraph {
+	node [shape = circle];
+	rankdir=TB
+	overlap=false
+{ rank = same; 0 }
+{ rank = same; 3; 11; 19; }
+{ rank = same; 5; 13; }
+{ rank = same; 4; 12; 20; }
+{ rank = same; 7; 15; }
+{ rank = same; 0; 8; 16; }
+{ rank = same; 1; 9; 17; }
+{ rank = same; 2; 10; 18; }
+{ rank = same; 6; 14; }
+  0 [label="0"]
+  1 [label="1"]
+  2 [label="2"]
+  3 [label="3"]
+  4 [label="4"]
+  5 [label="5"]
+  6 [label="6"]
+  7 [label="7"]
+  8 [label="0"]
+  9 [label="1"]
+  10 [label="2"]
+  11 [label="3"]
+  12 [label="4"]
+  13 [label="5"]
+  14 [label="6"]
+  15 [label="7"]
+  16 [label="0"]
+  17 [label="1"]
+  18 [label="2"]
+  19 [label="3"]
+  20 [label="4"]
+  0 -> 1 [constraint = true color = "#000000" label="po"]
+  1 -> 2 [constraint = true color = "#000000" label="po"]
+  2 -> 3 [constraint = true color = "#000000" label="po"]
+  3 -> 4 [constraint = true color = "#000000" label="po"]
+  4 -> 5 [constraint = true color = "#000000" label="po"]
+  5 -> 6 [constraint = true color = "#000000" label="po"]
+  6 -> 7 [constraint = true color = "#000000" label="po"]
+  0 -> 8 [constraint = true color = "#27556C" label="so"]
+  8 -> 9 [constraint = true color = "#000000" label="po"]
+  1 -> 9 [constraint = true color = "#27556C" label="so"]
+  9 -> 10 [constraint = true color = "#000000" label="po"]
+  2 -> 10 [constraint = true color = "#27556C" label="so"]
+  10 -> 11 [constraint = true color = "#000000" label="po"]
+  3 -> 11 [constraint = true color = "#27556C" label="so"]
+  11 -> 12 [constraint = true color = "#000000" label="po"]
+  4 -> 12 [constraint = true color = "#27556C" label="so"]
+  12 -> 13 [constraint = true color = "#000000" label="po"]
+  5 -> 13 [constraint = true color = "#27556C" label="so"]
+  13 -> 14 [constraint = true color = "#000000" label="po"]
+  14 -> 15 [constraint = true color = "#000000" label="po"]
+  8 -> 16 [constraint = true color = "#27556C" label="so"]
+  16 -> 17 [constraint = true color = "#000000" label="po"]
+  9 -> 17 [constraint = true color = "#27556C" label="so"]
+  17 -> 18 [constraint = true color = "#000000" label="po"]
+  10 -> 18 [constraint = true color = "#27556C" label="so"]
+  18 -> 19 [constraint = true color = "#000000" label="po"]
+  11 -> 19 [constraint = true color = "#27556C" label="so"]
+  19 -> 20 [constraint = true color = "#000000" label="po"]
+  12 -> 20 [constraint = true color = "#27556C" label="so"]
+  3 -> 19 [constraint = false color = "#A569BD" label="rfl"]
+  6 -> 19 [constraint = false color = "#48C9B0" label="rfg"]
+}
