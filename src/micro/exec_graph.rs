@@ -1,7 +1,9 @@
-use super::{Arch, MicroOp, Visibility, MicroOrdering};
 use crate::{
   graph::AdjList,
-  instr::{MemOp, Op, Relation, Event, Locality},
+  instr::{Op, Relation, Event, Locality},
+  mem::MemOp,
+  arch::{Arch, Visibility, MicroOrdering},
+  micro::{MicroOp},
 };
 impl Arch {
   pub fn create_micro_graph(&self, instr: &Vec<Vec<MemOp>>) -> AdjList<MicroOp, Relation> {
@@ -19,12 +21,12 @@ impl Arch {
       let mut prev : Option<Vec<usize>> = None;
 
       // Creating uops
-      mem_ops.iter().enumerate().for_each(|(pc, &mem_op)| {
-        let op = Op{core: 0, thread, pc, mem_op};
+      mem_ops.iter().enumerate().for_each(|(pc, &mem)| {
+        let op = Op{core: 0, thread, pc, mem};
         let stages = self.desc.stages.iter()
-          .take(1 + match mem_op {
+          .take(1 + match mem {
             MemOp::Write(_,_,_) => ret_write,
-            MemOp::Read(_,_,_) => ret_read,
+            MemOp::Read(_,_,_) | MemOp::ReadInit(_,_) => ret_read,
             MemOp::Init => unreachable!(),
             MemOp::Fence(_) => unimplemented!(),
           })

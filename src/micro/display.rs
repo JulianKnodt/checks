@@ -15,7 +15,7 @@ impl Graphviz for AdjList<MicroOp, Relation> {
     let mut stage_map = HashMap::new();
     self.nodes.iter().enumerate()
       .filter_map(|(i, uop)| uop.as_ref().map(|uop| (i, uop)))
-      .filter(|(_, uop)| !uop.op.mem_op.is_init())
+      .filter(|(_, uop)| !uop.op.mem.is_init())
       .for_each(|(i, uop)|
         stage_map.entry(uop.stage).or_insert_with(|| vec!()).push(i)
       );

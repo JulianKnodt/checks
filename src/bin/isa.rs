@@ -11,7 +11,7 @@ use checks::{
 
 fn main() {
   litmus::TESTS.iter().map(|test| test()).for_each(|(name, ops)| {
-    let mut graph = execution_graph(&ops);
+    let mut graph = execution_graph(ops);
     from_read(&mut graph);
 
     let file = format!("{}.dot", name);

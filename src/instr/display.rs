@@ -1,32 +1,16 @@
-use super::{Op, MemOp};
-use crate::graph::{AdjList, Graphviz};
-use crate::instr::Relation;
+use super::{Op};
+use crate::{
+  graph::{AdjList, Graphviz},
+  instr::Relation,
+};
 use std::fmt::{self, Display};
 
 impl Display for Op {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "Core({})|Thread({})|PC({})|{{{}}}",
-      self.core, self.thread, self.pc, self.mem_op)
+      self.core, self.thread, self.pc, self.mem)
   }
 }
-
-impl Display for MemOp {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      MemOp::Init => write!(f, "Init"),
-
-      MemOp::Write(loc, data, ord) =>
-        write!(f, "Write|Loc({})|Data({})|Ord({:?})", loc, data, ord),
-
-      MemOp::Read(loc, data, ord) =>
-        write!(f, "Read|Loc({})|Data({})|Ord({:?})",
-          loc, data.map_or(String::from("Init"), |d| format!("{}", d)), ord),
-
-      MemOp::Fence(ord) => write!(f, "Fence({:?})", ord),
-    }
-  }
-}
-
 
 impl Graphviz for AdjList<Op, Relation> {
   fn graphviz(&self) -> String {
@@ -34,7 +18,7 @@ impl Graphviz for AdjList<Op, Relation> {
     let mut pc_map = HashMap::new();
     self.nodes.iter().enumerate()
       .filter_map(|(i, op)| op.as_ref().map(|op| (i, op)))
-      .filter(|(_, op)| !op.mem_op.is_init())
+      .filter(|(_, op)| !op.mem.is_init())
       .for_each(|(i, op)|
         pc_map.entry(op.pc).or_insert_with(|| vec!()).push(i)
       );

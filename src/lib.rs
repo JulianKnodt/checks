@@ -16,5 +16,14 @@ TODO implement arch
 /// the microarchitectural stages of instructions
 pub mod micro;
 
+/// Mem contains abstractions over memory
+pub mod mem;
+
 /// Litmus tests
 pub mod litmus;
+
+pub mod bell;
+
+pub mod arch;
+
+// mod ppo;

@@ -1,9 +1,11 @@
-use super::{Visibility::*, Arch, ArchDescription, MicroOrdering, Stage};
+use crate::{
+  arch::{Stage, MicroOrdering, Visibility, ArchDescription},
+};
+use Visibility::*;
 
 /// RISC-V implementation
 pub const RISCV: ArchDescription = ArchDescription{
   name: "RISC-V",
-  non_local_mappings: &[],
   stages: &[
     Stage::new("Instruction Fetch", MicroOrdering::Queue, None),
     Stage::new("Instruction Decode", MicroOrdering::Queue, None),
@@ -13,8 +15,10 @@ pub const RISCV: ArchDescription = ArchDescription{
     Stage::new("WriteBack", MicroOrdering::Queue,
       Some(&[GlobalWrite, RetireRead, RetireWrite])),
   ],
+  unique_edges: None,
 };
 
+/// RISC-V implementation with store buffer
 pub const RISCV_SBUF: ArchDescription = ArchDescription{
   name: "RISC-V",
   stages: &[
@@ -31,12 +35,6 @@ pub const RISCV_SBUF: ArchDescription = ArchDescription{
     Stage::new("Completed", MicroOrdering::Unordered,
       Some(&[RetireWrite])),
   ],
-  non_local_mappings: &[],
+  unique_edges: None,
 };
 
-pub const ARCH_DESCS: &[ArchDescription] =
-  &[RISCV_SBUF];
-
-pub fn archs(cores: usize) -> Vec<Arch> {
-  ARCH_DESCS.iter().map(|desc| desc.instance(cores)).collect()
-}

@@ -162,3 +162,14 @@ mod graph_tests {
     assert_eq!(sample_graph().djikstra(0, 2), Some(vec!(0,1,2)));
   }
 }
+
+use std::iter::FromIterator;
+impl<V, E> FromIterator<V> for AdjList<V, E> {
+  fn from_iter<I: IntoIterator<Item=V>>(iter: I) -> Self {
+    let mut out = AdjList::new();
+    for v in iter {
+      out.push_node(v);
+    }
+    out
+  }
+}

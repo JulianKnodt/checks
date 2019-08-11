@@ -1,7 +1,7 @@
 use crate::{
-  graph::AdjList,
   micro::MicroOp,
   instr::Relation,
+  mem::State,
 };
 
 /// MicroOrdering defines whether or not a stage has relationship
@@ -50,11 +50,11 @@ impl Stage {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub struct ArchDescription {
   pub name: &'static str,
   pub stages: &'static [Stage],
-  pub non_local_mappings: &'static [fn(AdjList<MicroOp, Relation>) -> Vec<Relation>],
+  pub unique_edges: Option<fn(&Vec<MicroOp>, &State) -> Vec<Vec<(MicroOp, MicroOp, Relation)>>>,
 }
 
 impl ArchDescription {
@@ -63,7 +63,7 @@ impl ArchDescription {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone)]
 pub struct Arch {
   pub num_cores: usize,
   pub desc: &'static ArchDescription,
@@ -76,7 +76,8 @@ impl Arch {
     self.desc.stages.iter()
       .position(|s| s.vis.map_or(false, |vs| vs.iter().any(|v| v == &vis)))
       .expect(
-        format!("Cannot find visibility {:?}, Missing from arch({:?})", vis, self).as_str()
+        format!("Cannot find visibility {:?}, Missing from arch({:?})", vis, self.desc.name)
+          .as_str()
       )
   }
   pub fn stages_of(&self, vis: Vec<Visibility>) -> Vec<usize> {

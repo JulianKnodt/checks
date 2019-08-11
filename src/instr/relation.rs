@@ -10,6 +10,9 @@ pub enum Relation {
   ProgramOrder,
   StageOrder,
   ReadFrom(Locality),
+
+  /// Defines Ordering of writes to same location
+  /// Alternatively could be called WriteSerialization
   CoherenceOrder,
 
   /// Special Edges should be used for MicroArchitectural Non-Local-Edges
