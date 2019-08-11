@@ -58,7 +58,7 @@ pub struct ArchDescription {
 }
 
 impl ArchDescription {
-  pub fn instance(&'static self, num_cores: usize) -> Arch {
+  pub const fn instance(&'static self, num_cores: usize) -> Arch {
     Arch{num_cores, desc: self}
   }
 }
