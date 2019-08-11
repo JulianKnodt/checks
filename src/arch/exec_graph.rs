@@ -6,20 +6,27 @@ use crate::{
   micro::{MicroOp},
   litmus::LitmusTest,
 };
+use std::collections::HashMap;
+
 impl Arch {
   pub fn create_micro_graph(&self, test: LitmusTest) -> AdjList<MicroOp, Relation> {
     let mut out = AdjList::new();
 
-    let uops = test.convert_to_micro_ops(self);
+    let uops = test.to_uops(self);
 
-    uops.iter().fold(None, |_prev : Option<Vec<usize>>, next| {
-      let positions = next.iter().map(|&uop| {
-          let index = out.push_node(uop);
-          let _stage = self.stage(uop.stage);
-          if uop.stage != 0 { out.push_edge(index -1, index, Relation::ProgramOrder) }
-          index
-        }).collect();
-      Some(positions)
+    // insert into adj list in arbitrary order
+    let inserted : HashMap<(usize, usize, usize, usize),_> = uops.iter()
+      .map(|(&k, &uop)| (k, (out.push_node(uop), uop)))
+      .collect();
+
+    inserted.iter().for_each(|(&(core, thread, pc, stage), &(i, _))| {
+      if stage != 0 {
+        out.push_edge(inserted[&(core, thread, pc, stage-1)].0, i, Relation::ProgramOrder)
+      }
+      let arch_stage = self.stage(stage);
+      if pc != 0 && arch_stage.ord == MicroOrdering::Queue {
+        out.push_edge(inserted[&(core, thread, pc-1, stage)].0, i, Relation::StageOrder)
+      }
     });
 
     out

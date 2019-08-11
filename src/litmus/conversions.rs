@@ -4,13 +4,16 @@ use crate::{
   micro::MicroOp,
   instr::Op,
 };
+use std::collections::HashMap;
 
 impl LitmusTest {
-  /// Returns a list of micro_ops per each memory operation
-  pub fn convert_to_micro_ops(self, arch: &Arch) -> Vec<Vec<MicroOp>> {
-    self.into_iter().map(|(core, thread, pc, mem)| {
+  /// Returns micro ops indexed by (core, thread, pc, stage)
+  pub fn to_uops(self, arch: &Arch) ->
+    HashMap<(usize, usize, usize, usize), MicroOp> {
+    self.into_iter().flat_map(|(core, thread, pc, mem)| {
       let op = Op{core,thread,pc, mem: mem};
-      (0..arch.desc.stages.len()).map(move |stage| MicroOp{stage, op}).collect()
+      (0..arch.desc.stages.len())
+        .map(move |stage| ((core, thread, pc, stage), MicroOp{stage, op}))
     }).collect()
   }
 }
