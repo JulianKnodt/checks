@@ -1,7 +1,6 @@
 use super::{Relation, Op, Event, Locality};
 use crate::{
   graph::AdjList,
-  mem::MemOp,
   litmus::LitmusTest,
 };
 

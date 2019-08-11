@@ -1,5 +1,5 @@
 use crate::{
-  mem::{MemOp, write, read, read_init, State, Loc},
+  mem::{write, read, read_init, State, Loc},
   arch::Arch,
   micro::MicroOp,
   instr::Op,
