@@ -34,7 +34,7 @@ fn simple_seqcst(uops: &Vec<MicroOp>, end: &State) -> Vec<Vec<(MicroOp, MicroOp,
       .filter(move |p_uop| p_uop.op.same_core(&uop.op) && p_uop.op.imm_precedes(&uop.op))
       .map(move |p_uop| vec!((uop, p_uop, Relation::Special("EnforceWriteOrdering")))));
 
-  let before_all_writes = uops.iter()
+  let _before_all_writes = uops.iter()
     .filter(|uop| uop.op.mem.is_read_init() && uop.stage == 1)
     .flat_map(|uop| uops.iter()
       .filter(|p_uop| p_uop.stage == 2)

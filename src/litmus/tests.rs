@@ -1,8 +1,5 @@
 use crate::{
   mem::{write, read, read_init, State, Loc},
-  arch::Arch,
-  micro::MicroOp,
-  instr::Op,
   litmus::LitmusTest,
 };
 
