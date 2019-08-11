@@ -51,10 +51,10 @@ impl Event for Op {
 /// once for convenience.
 #[derive(Clone, Debug)]
 pub struct EventBuckets<E> {
-  pub writes: Vec<E>,
-  pub reads: Vec<E>,
-  pub fences: Vec<E>,
-  pub inits: Vec<E>,
+  pub writes: Vec<(usize, E)>,
+  pub reads: Vec<(usize, E)>,
+  pub fences: Vec<(usize, E)>,
+  pub inits: Vec<(usize, E)>,
 }
 
 impl<E> EventBuckets<E> {
@@ -73,14 +73,14 @@ use std::ops::Deref;
 impl<E: Event + Clone, D : Deref<Target=E>> FromIterator<D> for EventBuckets<E> {
   fn from_iter<I: IntoIterator<Item=D>>(iter: I) -> Self {
     let mut out = EventBuckets::new();
-    for v in iter {
+    for (i, v) in iter.into_iter().enumerate() {
       let bucket = match v.kind() {
         EventKind::Write => &mut out.writes,
         EventKind::Read => &mut out.reads,
         EventKind::Fence => &mut out.fences,
         EventKind::Init => &mut out.inits,
       };
-      bucket.push(v.clone());
+      bucket.push((i, v.clone()));
     }
     out
   }

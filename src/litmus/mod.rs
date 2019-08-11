@@ -7,3 +7,7 @@ pub use litmus::*;
 /// Tests is where tests are defined
 mod tests;
 pub use tests::*;
+
+/// Convert a litmus test to different forms
+mod conversions;
+pub use conversions::*;

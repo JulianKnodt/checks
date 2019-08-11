@@ -41,12 +41,6 @@ litmus_test!(iwp24,
 pub const TESTS: &[fn() -> (&'static str, LitmusTest)] =
   &[message_passing, store_buffering, load_buffering, single_load, iwp24];
 
-pub fn convert_to_micro_ops(arch: &Arch, ops: LitmusTest) -> Vec<MicroOp> {
-  ops.into_iter().flat_map(|(core, thread, pc, mem)| {
-    let op = Op{core,thread,pc, mem: mem};
-    (0..arch.desc.stages.len()).map(move |stage| MicroOp{stage, op})
-  }).collect()
-}
 
 /// Generates all possible end states for a given Litmus Test.
 /// Useful for enumerating all possible graphs to create

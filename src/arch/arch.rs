@@ -83,4 +83,7 @@ impl Arch {
   pub fn stages_of(&self, vis: Vec<Visibility>) -> Vec<usize> {
     vis.iter().map(|&v| self.stage_of(v)).collect()
   }
+  pub fn stage(&self, i: usize) -> &'static Stage {
+    &self.desc.stages[i]
+  }
 }
