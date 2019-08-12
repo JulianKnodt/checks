@@ -1,8 +1,8 @@
 mod op;
 pub use op::*;
 
-mod execution_graph;
-pub use execution_graph::*;
+mod exec_graph;
+pub use exec_graph::*;
 
 mod event;
 pub use event::*;

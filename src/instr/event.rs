@@ -1,7 +1,7 @@
 use super::{Op};
 use crate::mem::MemOp;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum EventKind { Read, Write, Fence, Init }
 pub trait Event {
   fn kind(&self) -> EventKind;
@@ -46,42 +46,3 @@ impl Event for Op {
   fn same_data(&self, o: &Self) -> bool { self.mem.same_data(&o.mem) }
 }
 
-/// EventBuckets is just a data structure
-/// for partitioning the different micro ops
-/// once for convenience.
-#[derive(Clone, Debug)]
-pub struct EventBuckets<E> {
-  pub writes: Vec<(usize, E)>,
-  pub reads: Vec<(usize, E)>,
-  pub fences: Vec<(usize, E)>,
-  pub inits: Vec<(usize, E)>,
-}
-
-impl<E> EventBuckets<E> {
-  fn new() -> Self {
-    EventBuckets{
-      writes: vec!(),
-      reads: vec!(),
-      fences: vec!(),
-      inits: vec!(),
-    }
-  }
-}
-
-use std::iter::FromIterator;
-use std::ops::Deref;
-impl<E: Event + Clone, D : Deref<Target=E>> FromIterator<D> for EventBuckets<E> {
-  fn from_iter<I: IntoIterator<Item=D>>(iter: I) -> Self {
-    let mut out = EventBuckets::new();
-    for (i, v) in iter.into_iter().enumerate() {
-      let bucket = match v.kind() {
-        EventKind::Write => &mut out.writes,
-        EventKind::Read => &mut out.reads,
-        EventKind::Fence => &mut out.fences,
-        EventKind::Init => &mut out.inits,
-      };
-      bucket.push((i, v.clone()));
-    }
-    out
-  }
-}

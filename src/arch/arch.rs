@@ -1,8 +1,9 @@
 use crate::{
   micro::MicroOp,
-  instr::Relation,
+  instr::{Relation, EventKind},
   mem::State,
 };
+use std::collections::HashMap;
 
 /// MicroOrdering defines whether or not a stage has relationship
 /// with other instructions stages
@@ -12,49 +13,30 @@ pub enum MicroOrdering {
   Unordered,
 }
 
-/// Visibility defines how a stages operation modifies memory and how threads
-/// will see it.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Visibility {
-
-  /// read/load is exposed globally at this stage(i.e. riscv::Mem lw)
-  GlobalRead,
-
-  /// write/store is exposed locally at this stage(i.e. riscv::Mem sw)
-  LocalWrite,
-
-  /// write/store is exposed globally at this stage(i.e. riscv::Mem sw)
-  GlobalWrite,
-
-  /// Retire the instruction(ignore the rest of the stages)
-  RetireWrite,
-  RetireRead,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Stage{
   pub name: &'static str,
   pub ord: MicroOrdering,
-
-  // This could technically be a set, but it will always contains very few elements
-  pub vis: Option<&'static [Visibility]>,
 }
 
 impl Stage {
-  pub const fn new(name: &'static str, ord: MicroOrdering, vis: Option<&'static [Visibility]>)
-    -> Self {
-    Stage{name, ord, vis}
-  }
-  pub fn has_vis(&self, vis: Visibility) -> bool {
-    self.vis.as_ref().map_or(false, |vs| vs.iter().any(|v| v == &vis))
+  pub const fn new(name: &'static str, ord: MicroOrdering) -> Self {
+    Stage{name, ord, }
   }
 }
 
+type MappingFunction = fn(&HashMap<EventKind, Vec<(usize, MicroOp)>>, end: &State) ->
+  Vec<Vec<(usize, usize, Relation)>>;
+
+/// A static description of a micro architectural pipeline
+/// that also contains a way to define additional edges.
 #[derive(Clone)]
 pub struct ArchDescription {
   pub name: &'static str,
   pub stages: &'static [Stage],
-  pub unique_edges: Option<fn(&Vec<MicroOp>, &State) -> Vec<Vec<(MicroOp, MicroOp, Relation)>>>,
+
+  // In theory all of them should have a mapping function, but easily disable with option
+  pub unique_edges: Option<MappingFunction>,
 }
 
 impl ArchDescription {
@@ -63,6 +45,7 @@ impl ArchDescription {
   }
 }
 
+/// An instance of an architecture description with a specified number of cores
 #[derive(Clone)]
 pub struct Arch {
   pub num_cores: usize,
@@ -70,19 +53,7 @@ pub struct Arch {
 }
 
 impl Arch {
-  /// Creates a graph of pipeline stages with program order edges, coherence order,
-  /// and read-from edges
-  pub fn stage_of(&self, vis: Visibility) -> usize {
-    self.desc.stages.iter()
-      .position(|s| s.vis.map_or(false, |vs| vs.iter().any(|v| v == &vis)))
-      .expect(
-        format!("Cannot find visibility {:?}, Missing from arch({:?})", vis, self.desc.name)
-          .as_str()
-      )
-  }
-  pub fn stages_of(&self, vis: Vec<Visibility>) -> Vec<usize> {
-    vis.iter().map(|&v| self.stage_of(v)).collect()
-  }
+  /// Stage returns the i'th stage of the architecture pipeline.
   pub fn stage(&self, i: usize) -> &'static Stage {
     &self.desc.stages[i]
   }

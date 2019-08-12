@@ -1,5 +1,5 @@
 use crate::{
-  mem::{write, read, read_init, State, Loc},
+  mem::{MemOp, write, read, read_init, State, Loc},
   litmus::LitmusTest,
 };
 
@@ -8,36 +8,45 @@ use crate::{
 /// Defines a litmus test function
 /// Was a pain to write.
 macro_rules! litmus_test {
-  ($name: ident, $( [ $($x:expr),+ ] );*) => {
-    pub fn $name() -> (&'static str, LitmusTest) {
-      (stringify!($name), LitmusTest::MultiThreaded(vec!($(vec!($($x),*)),*)))
+  ($name: ident, $kind: path, $items: ident)=> {
+    pub const fn $name() -> (&'static str, LitmusTest) {
+      (stringify!($name), $kind($items))
     }
   };
 }
 
-litmus_test!(message_passing,
-  [write(0,1), write(1,1)];
-  [read(1, 1), read_init(0)]);
+const MESSAGE_PASSING_OPS : &'static[&'static[MemOp]] =  &[
+  &[write(0,1), write(1,1)],
+  &[read(1, 1), read_init(0)],
+];
+litmus_test!(message_passing, LitmusTest::MultiThreaded, MESSAGE_PASSING_OPS);
 
-litmus_test!(store_buffering,
-  [write(0, 1), read(1, 1)];
-  [write(1, 1), read(0, 1)]);
+const STORE_BUFFERING_OPS : &'static[&'static[MemOp]] =  &[
+  &[write(0, 1), read(1, 1)],
+  &[write(1, 1), read(0, 1)],
+];
+litmus_test!(store_buffering, LitmusTest::MultiThreaded, STORE_BUFFERING_OPS);
 
-litmus_test!(load_buffering,
-  [read(0, 1), write(1, 1)];
-  [read(1, 1), write(0, 1)]);
+const LOAD_BUFFERING_OPS : &'static[&'static[MemOp]] =  &[
+  &[read(0, 1), write(1, 1)],
+  &[read(1, 1), write(0, 1)],
+];
+litmus_test!(load_buffering, LitmusTest::MultiThreaded, LOAD_BUFFERING_OPS);
 
-litmus_test!(single_load,
-  [write(0, 1), write(0, 2), read(0, 1)]);
+const SINGLE_LOAD_OPS: &'static[MemOp] =
+  &[write(0, 1), write(0, 2), read(0, 1)];
 
-litmus_test!(iwp24,
-  [write(0, 1), read(0, 1), read_init(1)];
-  [write(1, 1), read(1, 1), read_init(0)]);
+litmus_test!(single_load, LitmusTest::SingleThreaded, SINGLE_LOAD_OPS);
+
+const IWP24_OPS : &'static[&'static[MemOp]]= &[
+  &[write(0, 1), read(0, 1), read_init(1)],
+  &[write(1, 1), read(1, 1), read_init(0)],
+];
+litmus_test!(iwp24, LitmusTest::MultiThreaded, IWP24_OPS);
 
 /// A list of all litmus tests that should be loaded
 pub const TESTS: &[fn() -> (&'static str, LitmusTest)] =
   &[message_passing, store_buffering, load_buffering, single_load, iwp24];
-
 
 /// Generates all possible end states for a given Litmus Test.
 /// Useful for enumerating all possible graphs to create

@@ -1,10 +1,10 @@
 use crate::{
   graph::AdjList,
-  instr::{Op, Relation, Event, EventBuckets, Locality},
-  mem::MemOp,
-  arch::{Arch, Visibility, MicroOrdering},
+  instr::{Relation, Event},
+  arch::{Arch, MicroOrdering},
   micro::{MicroOp},
   litmus::LitmusTest,
+  mem::State,
 };
 use std::collections::HashMap;
 
@@ -13,6 +13,7 @@ impl Arch {
     let mut out = AdjList::new();
 
     let uops = test.to_uops(self);
+    let end_states = test.end_states();
 
     // insert into adj list in arbitrary order
     let inserted : HashMap<(usize, usize, usize, usize),_> = uops.iter()
@@ -28,6 +29,18 @@ impl Arch {
         out.push_edge(inserted[&(core, thread, pc-1, stage)].0, i, Relation::StageOrder)
       }
     });
+
+    let choices : Vec<(&State, Vec<Vec<(usize, usize, Relation)>>)> = self.desc.unique_edges
+      .as_ref()
+      .map(|mapping_fn| {
+      let mut input = HashMap::new();
+      inserted.iter()
+        .for_each(|(_, v)|
+          input.entry(v.1.kind()).or_insert_with(|| vec!()).push(*v)
+        );
+      unimplemented!();
+      end_states.iter().map(move |state| (state, mapping_fn(&input, state))).collect()
+    }).unwrap_or_else(|| vec!());
 
     out
   }
